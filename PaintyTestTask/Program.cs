@@ -1,7 +1,35 @@
+using DataAccess;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using RowiTechTask.Utility;
+using Utility;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+builder.Services
+    .AddDbContext<ApplicationDbContext>(options => options
+    .UseSqlServer(builder.Configuration
+    .GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+SD.ImgStorageUrl = builder.Configuration["ImgStorageUrl"];
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"/Identity/Account/Login";
+    options.LogoutPath = $"/Identity/Account/Logout";
+    options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+});
+
+CreateDirectory(builder);
 
 var app = builder.Build();
 
@@ -18,10 +46,20 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
+app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+static void CreateDirectory(WebApplicationBuilder builder)
+{
+    var path = Path.Combine(builder.Environment.WebRootPath, SD.ImgStorageUrl);
+    if (!Directory.Exists(path))
+    {
+        Directory.CreateDirectory(path);
+    }
+}

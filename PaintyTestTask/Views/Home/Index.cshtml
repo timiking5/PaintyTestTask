@@ -1,8 +1,23 @@
-﻿@{
+﻿@model List<Tuple<ApplicationUser, bool>>
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+<div>
+    @foreach(var pair in Model)
+    {
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;">
+                <a asp-controller="Account" asp-action="Index" asp-route-username="@pair.Item1.UserName" class="my-3 nav-link text-dark">@pair.Item1.UserName</a>
+                <div class="d-flex justify-content-center mb-2">
+                    <button type="button" class="btn btn-primary">@(pair.Item2 ? "Follow" : "Unfollow")</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
